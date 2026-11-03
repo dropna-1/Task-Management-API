@@ -20,7 +20,7 @@ async def lifespan(api: FastAPI):
         admin = result.scalar_one_or_none()
         if admin is None:
             admin = User(username = setting.ADMIN_USERNAME,
-                         hashed_password = setting.ADMIN_PASSWORD,
+                         hashed_password = password_hash.hash(setting.ADMIN_PASSWORD),
                          role = "admin")
             db.add(admin)
             await db.commit()
@@ -73,3 +73,11 @@ async def task_already_not_exist(request: Request, exc: TaskNotExistError):
 @app.exception_handler(TaskNotFoundError)
 async def task_not_found(request: Request, exc: TaskNotFoundError):
     return JSONResponse(status_code=404, content={"detail": "task not found"})
+
+@app.exception_handler(PromotedError)
+async def promoted(request: Request, exc: PromotedError):
+    return JSONResponse(status_code=400, content={"detail": "user already promoted"})
+
+@app.exception_handler(DemotedError)
+async def demoted(request: Request, exc: DemotedError):
+    return JSONResponse(status_code=400, content={"detail": "user already demoted"})
