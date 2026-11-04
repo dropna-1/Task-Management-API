@@ -5,6 +5,7 @@ from app.database.database import AsyncSessionLocal
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import setting
 from typing import Annotated
+from app.database.models import User
 import jwt
 
 async def get_db():
@@ -26,5 +27,11 @@ def get_admin(user: user_dependency):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403)
     return user.get("id")
+
+# def get_main_admin(user: user_dependency, db: db_dependency):
+#     userdb = db.get(User, user.get("id"))
+#     if user.get("role") != "admin":
+#         raise HTTPException(status_code=403)
+#     return user.get("id")
 
 admin_dependency = Annotated[int, Depends(get_admin)]

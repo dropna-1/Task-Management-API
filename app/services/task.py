@@ -1,8 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.models import Project
 from app.core.exceptions import *
-from sqlalchemy.orm import selectinload
-from app.database.models import Task
+from app.database.models import Task, User
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -41,3 +40,19 @@ async def delete_task_service(task_id: int, user_id: int, db: AsyncSession):
     if task.project.owner_id != user_id:
         raise ForbiddenError()
     await db.delete(task)
+
+
+async def get_tasks_service(db: AsyncSession, user_id: int, project_id: int):
+    user = db.get(User, user_id)
+    if user is None:
+        raise UserNotFoundError()
+    stmt = (select(Project).options(selectinload(Project.members))
+            .options(selectinload(Project.project_tasks))
+            .where(Project.id == project_id))
+    result = await db.execute(stmt)
+    project = result.scalar_one_or_none()
+    if project is None:
+        raise ProjectNotFoundError()
+    if user not in project.members:
+        raise ForbiddenError()
+    return project.project_tasks

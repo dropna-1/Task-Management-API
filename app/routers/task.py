@@ -16,3 +16,7 @@ async def complete_task(task_id: int, user: user_dependency, db: db_dependency):
 @router.delete("/delete/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(task_id: int, user: user_dependency, db: db_dependency):
     return await delete_task_service(task_id, user.get("id"), db)
+
+@router.get("/{project_id}/tasks", status_code=status.HTTP_200_OK)
+async def get_tasks(db: db_dependency, user: user_dependency, project_id: int):
+    return await get_tasks_service(db, user.get("id"), project_id)
