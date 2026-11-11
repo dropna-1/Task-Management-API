@@ -1,6 +1,6 @@
 from alembic.util import status
 from fastapi import Depends, HTTPException, status
-from app.core.security import oauth2_schema
+from app.core.security import oauth2_schema, password_hash
 from app.database.database import AsyncSessionLocal
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import setting
@@ -23,15 +23,18 @@ async def get_current_access(token: Annotated[str, Depends(oauth2_schema)]):
 user_dependency = Annotated[dict, Depends(get_current_access)]
 db_dependency = Annotated[AsyncSession, Depends(get_db)]
 
-def get_admin(user: user_dependency):
+async def get_admin(user: user_dependency):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403)
     return user.get("id")
 
-# def get_main_admin(user: user_dependency, db: db_dependency):
-#     userdb = db.get(User, user.get("id"))
-#     if user.get("role") != "admin":
-#         raise HTTPException(status_code=403)
-#     return user.get("id")
-
 admin_dependency = Annotated[int, Depends(get_admin)]
+
+async def get_main_admin(admin: admin_dependency, db: db_dependency) -> int:
+    userdb = await db.get(User, admin)
+    if (userdb.username != setting.ADMIN_USERNAME or
+            not password_hash.verify(setting.ADMIN_PASSWORD, userdb.hashed_password)):
+        raise HTTPException(status_code=403)
+    return admin
+
+main_admin_dependency = Annotated[int, Depends(get_main_admin)]
