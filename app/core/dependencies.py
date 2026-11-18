@@ -23,7 +23,7 @@ async def get_current_access(token: Annotated[str, Depends(oauth2_schema)]):
 user_dependency = Annotated[dict, Depends(get_current_access)]
 db_dependency = Annotated[AsyncSession, Depends(get_db)]
 
-async def get_admin(user: user_dependency):
+async def get_admin(user: user_dependency) -> int:
     if user.get("role") != "admin":
         raise HTTPException(status_code=403)
     return user.get("id")

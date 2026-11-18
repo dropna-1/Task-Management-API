@@ -60,3 +60,27 @@ async def delete_member_service(user_id: int, member_id: int, project_id: int, d
         raise MemberNotExistError()
     project.members.remove(user)
     await db.commit()
+
+
+
+async def change_owner_service(db: AsyncSession, user_id: int, new_owner_id: int, project_id: int):
+    stmt = select(Project).options(selectinload(Project.members)).where(Project.id == project_id)
+    result = await db.execute(stmt)
+    project = result.scalar_one_or_none()
+    if project is None:
+        raise ProjectNotFoundError()
+    if project.owner_id != user_id:
+        raise ForbiddenError()
+    if project.owner_id == new_owner_id:
+        raise SameOwnerError()
+    if new_owner_id not in [i.id for i in project.members]:
+        raise NotProjectMemberError()
+    new_owner = await db.get(User, new_owner_id)
+    if new_owner is None:
+        raise UserNotFoundError()
+    project.members.append(user_id)
+    project.members.remove(new_owner_id)
+    project.owner = new_owner
+    await db.commit()
+    await db.refresh(project)
+    return project

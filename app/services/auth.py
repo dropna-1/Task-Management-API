@@ -22,7 +22,7 @@ async def authenticate_user(name: str, password: str, db: AsyncSession):
 
 def create_access_token(user_id: int, user_role: str, time: timedelta):
     payload = {
-        "sub": user_id,
+        "sub": str(user_id),
         "role": user_role,
         "exp": datetime.now(timezone.utc) + time
     }

@@ -28,3 +28,10 @@ async def change_project_name(new_name: Annotated[str, Query(min_length=4, max_l
 async def delete_member(member_id: int, project_id: int,
                         user: user_dependency, db: db_dependency):
     return await delete_member_service(user.get("id"), member_id, project_id, db)
+
+
+@router.patch("/change",
+              status_code=status.HTTP_200_OK)
+async def change_owner(user: user_dependency, db: db_dependency,
+                       project_id: int, user_id: int):
+    return await change_owner_service(db, user.get("id"), user_id, project_id)

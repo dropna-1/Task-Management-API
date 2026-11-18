@@ -1,6 +1,3 @@
-from winreg import ExpandEnvironmentStrings
-
-
 class ProjectNotFoundError(Exception):
     pass
 
@@ -25,9 +22,6 @@ class TaskAlreadyExistError(Exception):
 class TaskAlreadySelectedError(Exception):
     pass
 
-class TaskNotExistError(Exception):
-    pass
-
 class TaskNotFoundError(Exception):
     pass
 
@@ -35,4 +29,10 @@ class PromotedError(Exception):
     pass
 
 class DemotedError(Exception):
+    pass
+
+class SameOwnerError(Exception):
+    pass
+
+class NotProjectMemberError(Exception):
     pass

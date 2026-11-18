@@ -7,6 +7,7 @@ from app.core.security import password_hash
 from app.routers.auth import  router as auth_router
 from app.routers.user import router as user_router
 from app.routers.project import router as project_router
+from app.routers.admin import router as admin_router
 from app.routers.task import router as task_router
 from contextlib import asynccontextmanager
 from app.core.exceptions import *
@@ -31,6 +32,7 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(project_router)
 app.include_router(task_router)
+app.include_router(admin_router)
 
 @app.exception_handler(ProjectNotFoundError)
 async def project_not_found(request: Request, exc: ProjectNotFoundError):
@@ -66,10 +68,6 @@ async def task_already_selected(request: Request, exc: TaskAlreadySelectedError)
     return JSONResponse(status_code=409,
                         content={"detail": "task already selected by someone else"})
 
-@app.exception_handler(TaskNotExistError)
-async def task_already_not_exist(request: Request, exc: TaskNotExistError):
-    return JSONResponse(status_code=404, content={"detail": "task not exist"})
-
 @app.exception_handler(TaskNotFoundError)
 async def task_not_found(request: Request, exc: TaskNotFoundError):
     return JSONResponse(status_code=404, content={"detail": "task not found"})
@@ -81,3 +79,11 @@ async def promoted(request: Request, exc: PromotedError):
 @app.exception_handler(DemotedError)
 async def demoted(request: Request, exc: DemotedError):
     return JSONResponse(status_code=400, content={"detail": "user already demoted"})
+
+@app.exception_handler(SameOwnerError)
+async def same_owner(request: Request, exc: SameOwnerError):
+    return JSONResponse(status_code=409, content={"detail": "user is already an owner"})
+
+@app.exception_handler(NotProjectMemberError)
+async def not_project_member(request: Request, exc: NotProjectMemberError):
+    return JSONResponse(status_code=404, content={"detail": "user is not in the project"})
