@@ -3,7 +3,7 @@ from app.database.models import User, Project, Task, project_members
 from app.schemas import ChangePasswordRequest
 from app.core.security import password_hash
 from app.core.exceptions import *
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import joinedload
 from sqlalchemy import select, exists
 
 
@@ -26,7 +26,7 @@ async def accept_task_service(task_id: int, user_id: int, db: AsyncSession):
     result = await db.execute(stmt)
     task = result.scalar_one_or_none()
     if task is None:
-        raise TaskNotExistError()
+        raise TaskNotFoundError()
     if task.doer_id is not None:
         raise TaskAlreadySelectedError()
     stmt = select(exists().where(project_members.c.project_id == task.project_id,
@@ -38,3 +38,13 @@ async def accept_task_service(task_id: int, user_id: int, db: AsyncSession):
     task.doer = user
     await db.commit()
     return task
+
+
+async def reject_task_service(task_id: int, user_id: int, db: AsyncSession):
+    task = await db.get(Task, task_id)
+    if task is None:
+        raise TaskNotFoundError()
+    if task.doer_id != user_id:
+        raise ForbiddenError()
+    task.doer_id = None
+    await db.commit()

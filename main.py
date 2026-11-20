@@ -87,3 +87,7 @@ async def same_owner(request: Request, exc: SameOwnerError):
 @app.exception_handler(NotProjectMemberError)
 async def not_project_member(request: Request, exc: NotProjectMemberError):
     return JSONResponse(status_code=404, content={"detail": "user is not in the project"})
+
+@app.exception_handler(CannotDeleteUserError)
+async def cannot_delete_user(request: Request, exc: CannotDeleteUserError):
+    return JSONResponse(status_code=403, content={"detail": "user has project or projects"})

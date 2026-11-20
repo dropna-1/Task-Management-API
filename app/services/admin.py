@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import *
 from app.database.models import User, Project
+from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 
 async def get_all_users_service(db: AsyncSession):
@@ -35,3 +36,16 @@ async def demote_service(db: AsyncSession, user_id: int):
     user.role = "user"
     await db.commit()
     return user
+
+
+async def delete_user_service(db: AsyncSession, user_id: int):
+    user = await db.get(User, user_id)
+    if user is None:
+        raise UserNotFoundError()
+    stmt = select(Project).where(Project.owner_id == user_id)
+    result = await db.execute(stmt)
+    project = result.scalars().all()
+    if project:
+        raise CannotDeleteUserError()
+    await db.delete(user)
+    await db.commit()

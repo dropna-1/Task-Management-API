@@ -19,3 +19,7 @@ async def promote(admin: main_admin_dependency, db: db_dependency, user_id: int)
 @router.patch("/demote/{user_id}", status_code=status.HTTP_200_OK)
 async def demote(admin: main_admin_dependency, db: db_dependency, user_id: int):
     return await demote_service(db, user_id)
+
+@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(admin: main_admin_dependency, db: db_dependency, user_id: int):
+    pass

@@ -36,3 +36,6 @@ class SameOwnerError(Exception):
 
 class NotProjectMemberError(Exception):
     pass
+
+class CannotDeleteUserError(Exception):
+    pass

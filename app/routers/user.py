@@ -24,3 +24,7 @@ async def accept_task(task_id: Annotated[int, Path(gt=0)],
                       user: user_dependency, db: db_dependency):
     return accept_task_service(task_id, user.get("id"), db)
 
+@router.patch("/task/{task_id}/reject", status_code=status.HTTP_204_NO_CONTENT)
+async def reject_task(task_id: Annotated[int, Path(gt=0)],
+                      user: user_dependency, db: db_dependency):
+    return await reject_task_service(task_id, user.get("id"), db)
